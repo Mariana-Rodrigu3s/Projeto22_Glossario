@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
 from tkinter import messagebox
+import sqlite3
 
 
 
@@ -53,6 +54,8 @@ excluir = ttk.Button(botoes,
 alterar = ttk.Button(botoes,
                      style="outline button",
                      text="Alterar").pack(side="left", padx=10)
+
+conexao = sqlite3.connect("./bddados.sqlite")
 
 
         
