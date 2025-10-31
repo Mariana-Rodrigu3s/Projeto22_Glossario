@@ -22,10 +22,10 @@ class Glossario:
         cursor = conexao.cursor()
 
         glossario = """
-                        CREATE TABLE IF NOT EXISTS glossarios(
+                        CREATE TABLE IF NOT EXISTS glossario(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         termo VARCHAR(200),
-                        definição VARCHAR(5000),
+                        definicao VARCHAR(5000),
                         categoria VARCHAR(100));
         """
 
@@ -77,17 +77,17 @@ class Glossario:
         self.tw = ttk.Treeview(self.janela)
         self.tw.pack(side="bottom", fill="both")
 
-        self.tw["columns"] = ("id","termo", "definição", "categoria")
+        self.tw["columns"] = ("id","termo", "definicao", "categoria")
 
         self.tw["show"] = "headings"
         self.tw.heading("id", text="ID")
         self.tw.heading("termo", text="Termo")
-        self.tw.heading("definição", text="Definição")
+        self.tw.heading("definicao", text="Definição")
         self.tw.heading("categoria", text="Categoria")
         
         self.tw.column("id", width=50)
         self.tw.column("termo", width=50)
-        self.tw.column("definição", width=90)
+        self.tw.column("definicao", width=90)
         self.tw.column("categoria", anchor="center")
 
 
@@ -111,7 +111,7 @@ class Glossario:
                             text="Alterar",
                             width=30).pack(padx=20, pady=10, side="left")
 
-
+        self.carregar_treeview()
 
         
     # Adicionar Itens
@@ -126,10 +126,10 @@ class Glossario:
        
 
         cursor.execute("""
-                INSERT INTO glossarios
+                INSERT INTO glossario
                 
                 (termo,
-                definição,
+                definicao,
                 categoria)
                 VALUES
                 (?,
@@ -147,12 +147,17 @@ class Glossario:
 
         self.carregar_treeview()
 
+       
+
     def carregar_treeview(self):
+        # Limpa os dados anteriores
+        for linha in self.tw.get_children():
+            self.tw.delete(linha)
 
         conexao = sqlite3.connect("./bddados.sqlite")
         cursor = conexao.cursor()
 
-        cursor.execute("SELECT * FROM glossarios")
+        cursor.execute("SELECT * FROM glossario")
         dados = cursor.fetchall()
 
         for linha in dados:
@@ -163,9 +168,34 @@ class Glossario:
 
     def excluir_itens(self):
         selecionado = self.tw.selection()
-        self.tw.delete(selecionado)
+        if not selecionado:
+            messagebox.showwarning("Aviso", "Selecione um item para excluir")
+            return
 
+        if selecionado:
+
+            valores = self.tw.item(selecionado[0], "values")
+            conexao = sqlite3.connect("./bddados.sqlite")
+            cursor = conexao.cursor()
+
+            cursor.execute("DELETE FROM glossario WHERE id = ?", (valores[0],))
+            conexao.commit()
+            cursor.close()
+            conexao.close()
+
+    def atualizar(self):
+        selecionado = self.tw.selection()
+        if not selecionado:
+            messagebox.showwarning("Aviso", "Selecione um item para alterar")
+            return
+        
+        
   
+       
+
+    
+    
+
 
 
 
