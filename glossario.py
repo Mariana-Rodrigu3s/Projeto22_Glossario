@@ -168,11 +168,13 @@ class Glossario:
 
     def excluir_itens(self):
         selecionado = self.tw.selection()
+        
         if not selecionado:
             messagebox.showwarning("Aviso", "Selecione um item para excluir")
             return
 
         if selecionado:
+            
 
             valores = self.tw.item(selecionado[0], "values")
             conexao = sqlite3.connect("./bddados.sqlite")
@@ -183,11 +185,45 @@ class Glossario:
             cursor.close()
             conexao.close()
 
+        self.tw.delete(selecionado)
+
+
     def atualizar(self):
         selecionado = self.tw.selection()
+        
+
         if not selecionado:
-            messagebox.showwarning("Aviso", "Selecione um item para alterar")
+            messagebox.showerror("Aviso", "Selecione um item para alterar")
             return
+        
+        
+        item = self.tw.item(selecionado[0])
+        valores = item["values"]
+        id = valores[0]
+
+
+        termos = self.entrada_termo.get()
+        definicoes = self.entrada_definicao.get()
+        categoria = self.entrada_categoria.get()
+
+        
+
+        conexao = sqlite3.connect("./bddados.sqlite")
+        cursor = conexao.cursor()
+
+
+        cursor.execute("""
+                           UPDATE glossario
+                           SET termo = ?, definicao = ?, categoria = ?
+                           WHERE id = ? """, [termos, definicoes, categoria, id])
+            
+        conexao.commit()
+        conexao.close()
+
+
+
+            
+
         
         
   

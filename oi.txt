@@ -1,0 +1,24 @@
+def atualizar(self):
+    selecionado = self.tw.selection()
+
+    if not selecionado:
+        messagebox.showerror("Aviso", "Selecione um item para alterar")
+        return
+
+    item = self.tw.item(selecionado[0])
+    valores = item["values"]
+    id_item = valores[0]  # o ID do item selecionado
+
+    termos = self.entrada_termo.get()
+    definicoes = self.entrada_definicao.get()
+    categoria = self.entrada_categoria.get()
+
+    # Atualiza o banco
+    conexao = sqlite3.connect("./bddados.sqlite")
+    cursor = conexao.cursor()
+
+    cursor.execute("""
+        UPDATE glossario
+        SET termo = ?, definicao = ?, categoria = ?
+        WHERE id = ?
+    """, (termos, definicoes, categoria, id_item))
