@@ -9,14 +9,14 @@ class Glossario:
 
 
     
-        # Janela Principal
+        #------------------ Janela Principal --------------------------------------
         self.janela = ttk.Window(themename="minty",
                                         title="Glossário de Termos Técnicos")
         self.janela.geometry("720x700")
         self.janela.resizable(False, False)
 
 
-        # Banco de Dados e Criação da Tabela
+        #---------------- Banco de Dados e Criação da Tabela ---------------------
         conexao = sqlite3.connect("./bddados.sqlite")
 
         cursor = conexao.cursor()
@@ -36,7 +36,7 @@ class Glossario:
         conexao.close()
 
 
-        # Labels
+        #------------------------ Labels -----------------------------------------
         self.titulo = ttk.Label(self.janela,
                         text="Glossário",
                         font=('Ink Free', 25)).pack()
@@ -58,8 +58,12 @@ class Glossario:
                             text="Digite a Definição:",
                             font=('Arial', 13)).place(x=20, y=210)
         
+        self.pesquisa = ttk.Label(self.janela,
+                                  text="Digite o Termo...",
+                                  font=('Arial', 10)).place(x=580)
+        
 
-        # Campos de Entrada
+        #------------------------ Campos de Entrada ----------------------------------
         self.entrada_termo = ttk.Entry(self.janela,
                                 width=110)
         self.entrada_termo.place(x=20, y=130)
@@ -71,9 +75,16 @@ class Glossario:
         self.entrada_categoria = ttk.Entry(self.janela,
                                     width=110)
         self.entrada_categoria.place(x=20, y=350)
+
+        self.entrada_pesquisa = ttk.Entry(self.janela,
+                                          width=15)
+        self.entrada_pesquisa.place(x=580, y=30)
+
+        # vincula o evento de digitação na função de filtrar
+        self.entrada_pesquisa.bind("<KeyRelease>", self.filtrar_tw)
         
 
-        # TreeView (Tabela Visual)
+        #--------------------------- TreeView (Tabela Visual) ----------------------
         self.tw = ttk.Treeview(self.janela)
         self.tw.pack(side="bottom", fill="both")
 
@@ -91,7 +102,7 @@ class Glossario:
         self.tw.column("categoria", anchor="center")
 
 
-        # Botões
+        #----------------------------------------- Botões ----------------------------------
         botoes = ttk.Frame(self.janela).pack(pady=130)
         
         self.adicionar = ttk.Button(botoes,
@@ -109,13 +120,15 @@ class Glossario:
         self.alterar = ttk.Button(botoes,
                             style="outline button",
                             text="Alterar",
+                            command=self.atualizar,
                             width=30).pack(padx=20, pady=10, side="left")
 
         self.carregar_treeview()
 
         
-    # Adicionar Itens
+    #------------------------------------------- Adicionar Itens ---------------------------------
     def adicionar_item(self):
+        
         termos = self.entrada_termo.get()
         definicoes = self.entrada_definicao.get()
         categorias = self.entrada_categoria.get()
@@ -148,9 +161,9 @@ class Glossario:
         self.carregar_treeview()
 
        
-
+    #------------------------------ Carregar a TreeView (Fazer ela aparecer) -------------------
     def carregar_treeview(self):
-        # Limpa os dados anteriores
+        # limpa os dados anteriores
         for linha in self.tw.get_children():
             self.tw.delete(linha)
 
@@ -160,12 +173,13 @@ class Glossario:
         cursor.execute("SELECT * FROM glossario")
         dados = cursor.fetchall()
 
+        # insere os dados na treeview
         for linha in dados:
             self.tw.insert("", "end", values=linha)
 
         conexao.close()
 
-
+    #------------------------- Excluir Itens -----------------------------
     def excluir_itens(self):
         selecionado = self.tw.selection()
         
@@ -175,7 +189,7 @@ class Glossario:
 
         if selecionado:
             
-
+            # pega o ID dos itens selecionados
             valores = self.tw.item(selecionado[0], "values")
             conexao = sqlite3.connect("./bddados.sqlite")
             cursor = conexao.cursor()
@@ -187,7 +201,7 @@ class Glossario:
 
         self.tw.delete(selecionado)
 
-
+    #---------------------------- Atualizar Itens -------------------------------------
     def atualizar(self):
         selecionado = self.tw.selection()
         
@@ -201,7 +215,7 @@ class Glossario:
         valores = item["values"]
         id = valores[0]
 
-
+        # pega os novos itens dos campos de entrada
         termos = self.entrada_termo.get()
         definicoes = self.entrada_definicao.get()
         categoria = self.entrada_categoria.get()
@@ -219,6 +233,45 @@ class Glossario:
             
         conexao.commit()
         conexao.close()
+
+        self.carregar_treeview()
+
+        messagebox.showinfo("Parabéns", "Alterado com sucesso!")
+
+    #-------------------------- Desafio Final ---------------------
+    def filtrar_tw(self, event):
+        #strip para remover os espaços em branco e o lower para deixar tudo em minusculo
+        busca = self.entrada_pesquisa.get().strip().lower()
+
+        for linha in self.tw.get_children():
+            self.tw.delete(linha)
+
+        
+        conexao = sqlite3.connect("./bddados.sqlite")
+        cursor = conexao.cursor()
+
+        if busca == "":
+            cursor.execute("SELECT * FROM glossario")
+        
+        #lower do sql para transformar os termos da coluna em minusculo
+        else:
+            cursor.execute("""
+                 SELECT * FROM glossario
+                WHERE LOWER(termo) LIKE ?
+""", (busca + "%",))
+            # A "," serve para criar uma tupla
+            
+        dados = cursor.fetchall()
+
+        for linha in dados:
+            self.tw.insert("", "end", values=linha)
+        
+        conexao.close()
+
+
+
+
+        
 
 
 

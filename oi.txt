@@ -1,24 +1,31 @@
-def atualizar(self):
-    selecionado = self.tw.selection()
+def filtrar_tw(self, event):
+        #strip para remover os espaços em branco e o lower para deixar tudo em minusculo
+        busca = self.entrada_pesquisa.get().strip().lower()
 
-    if not selecionado:
-        messagebox.showerror("Aviso", "Selecione um item para alterar")
-        return
+        for linha in self.tw.get_children():
+            self.tw.delete(linha)
 
-    item = self.tw.item(selecionado[0])
-    valores = item["values"]
-    id_item = valores[0]  # o ID do item selecionado
+        
+        conexao = sqlite3.connect("./bddados.sqlite")
+        cursor = conexao.cursor()
 
-    termos = self.entrada_termo.get()
-    definicoes = self.entrada_definicao.get()
-    categoria = self.entrada_categoria.get()
+        if busca == "":
+            cursor.execute("SELECT * FROM glossario")
+        
+        #lower do sql para transformar os termos da coluna em minusculo
+        else:
+            cursor.execute("""
+                 SELECT * FROM glossario
+                WHERE LOWER(termo) LIKE ?
+""", (busca + "%",))
+            # A "," serve para criar uma tupla
+            
+        dados = cursor.fetchall()
 
-    # Atualiza o banco
-    conexao = sqlite3.connect("./bddados.sqlite")
-    cursor = conexao.cursor()
+        for linha in dados:
+            self.tw.insert("", "end", values=linha)
+        
+        conexao.close()
 
-    cursor.execute("""
-        UPDATE glossario
-        SET termo = ?, definicao = ?, categoria = ?
-        WHERE id = ?
-    """, (termos, definicoes, categoria, id_item))
+# vincula o evento de digitação na função de filtrar
+        self.entrada_pesquisa.bind("<KeyRelease>", self.filtrar_tw)
