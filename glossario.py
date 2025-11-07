@@ -238,7 +238,7 @@ class Glossario:
         messagebox.showinfo("Parabéns", "Alterado com sucesso!")
 
     #-------------------------- Desafio Final ---------------------
-    def filtrar_tw(self):
+    def filtrar_tw(self, event):
         #strip para remover os espaços em branco e o lower para deixar tudo em minusculo
         busca = self.entrada_pesquisa.get().strip().lower()
 
@@ -253,12 +253,17 @@ class Glossario:
             cursor.execute("SELECT * FROM glossario")
         
         #lower do sql para transformar os termos da coluna em minusculo
-   
+        else:
+            cursor.execute("""
+                 SELECT * FROM glossario
+                WHERE LOWER(termo) LIKE ?
+""", (busca + "%",))
 
             
         dados = cursor.fetchall()
 
-        
+        for linha in dados:
+            self.tw.insert("", "end", values=linha)
         
         conexao.close()
 
