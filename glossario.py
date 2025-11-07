@@ -1,6 +1,5 @@
 import ttkbootstrap as ttk
 from tkinter import messagebox
-from tkinter import Listbox
 import sqlite3
 
 class Glossario:
@@ -59,7 +58,7 @@ class Glossario:
                             font=('Arial', 13)).place(x=20, y=210)
         
         self.pesquisa = ttk.Label(self.janela,
-                                  text="Digite o Termo...",
+                                  text="Pesquise o Termo...",
                                   font=('Arial', 10)).place(x=580)
         
 
@@ -259,7 +258,7 @@ class Glossario:
                  SELECT * FROM glossario
                 WHERE LOWER(termo) LIKE ?
 """, (busca + "%",))
-            # A "," serve para criar uma tupla
+
             
         dados = cursor.fetchall()
 
