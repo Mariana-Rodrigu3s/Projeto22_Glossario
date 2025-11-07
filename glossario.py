@@ -76,7 +76,7 @@ class Glossario:
         self.entrada_categoria.place(x=20, y=350)
 
         self.entrada_pesquisa = ttk.Entry(self.janela,
-                                          width=15)
+                                          width=20)
         self.entrada_pesquisa.place(x=580, y=30)
 
         # vincula o evento de digitação na função de filtrar
